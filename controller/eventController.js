@@ -19,20 +19,41 @@ const eventController = {
             const { name, total } = req.body
             const insertValues = [name, total, total, generateRandom(20)]
 
-            await mysqlDatabase.connection.beginTransaction().then(result => {
-            mysqlDatabase.query('INSERT INTO events (name, total_tickets, pending_tickets, event_ref) VALUES (?, ?, ?, ?)', insertValues).then(
-                result => {
-                    mysqlDatabase.connection.commit()
+           let mysqlDataRes = await mysqlDatabase.connection.beginTransaction().then(result => {
+
+                let databaseRes = {
+                    status: true,
+                    message: ''
                 }
-            ).catch((error) => {
-                mysqlDatabase.connection.rollback();
-                throw error;
-            });
+
+                let existQuery = [name]
+               return mysqlDatabase.query('SELECT * FROM events WHERE name = ?', existQuery).then(eventData => {
+                    if(eventData.length <= 0){
+                        mysqlDatabase.query('INSERT INTO events (name, total_tickets, pending_tickets, event_ref) VALUES (?, ?, ?, ?)', insertValues).then(
+                            result => {
+                                databaseRes.message = "Event created successfully"
+
+                                mysqlDatabase.connection.commit()
+
+                            }
+                        ).catch((error) => {
+                            mysqlDatabase.connection.rollback();
+                            throw error;
+                        });
+                    }else{
+                        databaseRes.message = "event has already been added to the system"
+                    }
+
+                    return databaseRes
+
+                })
+
+
             }).catch((error) => {
                 throw error
             })
             
-            return res.status(200).send(resData(true, true, "Event created successfully", null, null, null))
+            return res.status(200).send(resData(true, true, mysqlDataRes.message, mysqlDataRes, null, null))
 
         }catch(error){
             return res.status(404).send(resData(false, false, "Server Error", error, null, null))
