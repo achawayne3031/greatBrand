@@ -1,9 +1,9 @@
 const env = require('dotenv').config({ debug: process.env.DEBUG });
 const express = require('express');
-// const dbConnect = require('./config/init');
 const ticket = require('./router/ticketRoute');
 const event = require('./router/eventRoute');
 const cors = require('cors')
+const rateLimit = require('express-rate-limit');
  
 
 var app = express();
@@ -12,6 +12,11 @@ app.use(express.urlencoded({ extended: true }));
 // app.use(express.static('public'));
 app.use(cors());;
 
+// Apply rate limiting  
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // Limit to 200 requests per windowMs
+}));
 
 
 app.use('/api/ticket', ticket);

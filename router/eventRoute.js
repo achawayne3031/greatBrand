@@ -4,6 +4,8 @@ const eventController = require('../controller/eventController')
 
 
 router.post('/create', eventController.createEvent)
+router.get('/status/:event', eventController.getEvent)
+
 
 
 
