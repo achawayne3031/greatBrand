@@ -9,7 +9,6 @@ const rateLimit = require('express-rate-limit');
 var app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(express.static('public'));
 app.use(cors());;
 
 // Apply rate limiting  
